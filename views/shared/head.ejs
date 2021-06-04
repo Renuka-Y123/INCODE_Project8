@@ -1,0 +1,6 @@
+<head>
+    <title><%= title %></title>
+    <% css.forEach(style => { %>
+        <link rel='stylesheet' type="text/css" href='<%= `/css/${style}.css` %>') />
+    <% }); %>
+</head>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <%- include('../shared/head', {css: ['index', 'navbar']}) %>
+    <body>
+        <%- include('../shared/navbar', {}) %>
+        <div>
+            <h1>Liste des tickets</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="idTicket">Tichet ID</th>
+                        <th class="showTicket">Voir Ticket</th>
+                        <th class="editTicket">Editer Ticket</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (index = 0; index < tickets.length; index++) { %>
+                        <% const ticket = tickets[index] %>
+                        <tr key={index}>
+                            <td><%= ticket._id %></td>
+                            <td><a href="/ticket/<%= ticket._id %>" class="nav-link">Voir</a></td>
+                            <td><a href="/ticket/<%= ticket._id %>/edit" class="nav-link">Editer</a></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
