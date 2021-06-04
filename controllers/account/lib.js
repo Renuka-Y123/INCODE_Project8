@@ -1,5 +1,6 @@
 const User = require('../../schema/schemaUser.js');
-
+const config = require('../../config/config')
+const crypto = require('crypto');
 function signup(req, res) {
     if (!req.body.email || !req.body.password) {
         //Le cas où l'email ou bien le password ne serait pas soumit ou nul
@@ -28,8 +29,9 @@ function signup(req, res) {
             })
         })
 
-        findUser.then(function () {
+        findUser.then(async function () {
             var _u = new User(user);
+            _u.password = await getHashedPassword(user.password)
             _u.save(function (err, user) {
                 if (err) {
                     res.status(500).json({
@@ -74,7 +76,7 @@ function login(req, res) {
     } else {
         User.findOne({
             email: req.body.email
-        }, function (err, user) {
+        }, async function (err, user) {
             if (err) {
                 res.status(500).json({
                     "text": "Erreur interne"
@@ -86,8 +88,11 @@ function login(req, res) {
                 })
             }
             else {
-                if (user.authenticate(req.body.password)) {
+                const isUserValid = await user.authenticate(req.body.password);
+                if (isUserValid) {
                     req.session.token = user.getToken();
+                    res.cookie('user', user.id);
+                    res.cookie('email', user.email);
                     res.redirect('../../ticket/');
                 }
                 else{
@@ -108,6 +113,17 @@ function signout(req, res) {
     delete req.session.token;
     res.redirect('login');
 }
+
+async function getHashedPassword(password){
+    try {
+      const hashpass = await crypto
+        .pbkdf2Sync(password, config.salt, config.iterations, 64, 'sha512')
+        .toString('base64')
+      return hashpass
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
 exports.login = login;
 exports.loginForm = loginForm;

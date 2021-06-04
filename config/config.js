@@ -1,3 +1,5 @@
 module.exports = {
-	"secret" : "becomeFullStack"
+	"secret" : "becomeFullStack",
+	"salt" 	 : "thisIsASecret",
+	"iterations" : 1000
 }

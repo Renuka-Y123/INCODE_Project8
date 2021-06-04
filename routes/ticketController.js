@@ -29,5 +29,7 @@ router.get('/:id', authenticateJWT, ticket.show);
 router.get('/:id/edit', authenticateJWT, ticket.edit);
 router.post('/:id/update', authenticateJWT, ticket.update);
 router.get('/', authenticateJWT, ticket.list);
+router.post('/:id/comment', authenticateJWT, ticket.comment);
+router.get('/:id/viewComments', authenticateJWT, ticket.viewComments);
 
 module.exports = router;

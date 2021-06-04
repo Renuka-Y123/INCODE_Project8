@@ -1,16 +1,133 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <%- include('../shared/head', {css: ['details', 'navbar']}) %>
-    <body>
-        <%- include('../shared/navbar', {}) %>
-        <div class="details">
-            <h1>Details Ticket</h1>
-            <h2>Id : <%= ticket.id %></h2>
-            <h2>Titre : <%= ticket.title %></h2>
-            <h2>Description : <%= ticket.description %></h2>
-            <h2>Responsable : <%= ticket.responsible %></h2>
-            <h2>Priorité : <%= ticket.priority %></h2>
-            <h2>Statut : <%= ticket.completed ? "Résolu" : "En cours" %></h2>
+  <%- include('../shared/head', {css: ['details', 'navbar']}) %>
+  <body>
+    <%- include('../shared/navbar', {}) %>
+    <div class="details">
+      <h1>Details Ticket</h1>
+      <p>Id : <%= ticket.id %></p>
+      <p>Titre : <%= ticket.title %></p>
+      <p>Description : <%= ticket.description %></p>
+      <p>Responsable : <%= ticket.responsible %></p>
+      <p>Priorité : <%= ticket.priority %></p>
+      <p>Statut : <%= ticket.completed ? "Résolu" : "En cours" %></p>
+      <hr />
+      <div>
+        <p>Add Comment:</p>
+        <input type="hidden" name="_tid" id="_tid" value="<%= ticket.id %>" />
+        <div>
+          <textarea
+            name="comment"
+            id="comment"
+            placeholder="Comments"
+            rows="4" cols="50" min=10 max=100 pattern='/^[A-Za-z0-9-_\s]'
+          ></textarea>
         </div>
-    </body>
+        <div>
+          <button id="go" type="submit">
+            Add
+          </button>
+        </div>
+        </div>
+        <hr />
+        <a href="#" id= "viewComments">View Comments</a>
+      </div>
+      <hr />
+
+      <div id="commentsList"></div>
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script>
+        var ajaxResultc = []
+        var ajaxResultvc = []
+      $(document).ready(function () {
+        $('#go').click(function () { 
+          var tid = $('#_tid').val()
+          var newComment = {
+            authorId: getCookieValue('user'),
+            comment: $('#comment').val(),
+            email: getCookieValue('email'),
+            _id: $('#_tid').val()
+          }
+          $.ajax({
+            url: '/ticket/${tid}/Comment',
+            method: 'POST',
+            data: JSON.stringify(newComment),
+            contentType: 'application/json',
+            success: function (data) {
+            if(data.error == 'errorInput')
+            alert("Please enter valid input. Comments should be Alphanumeric. -_ are allowed")
+            else{
+            if(data.error== 'error') 
+            alert("Ticket not found")
+            else{
+              try {
+                ajaxResultc.push(data)
+                comments = data.comments
+                //Cleaning comments list to set new comments list
+                $('#commentsList').empty()
+
+                //Populating comments list
+                data.forEach(element => {
+                  $('#commentsList').append(`
+                    <li class="mb-2 bg-light rounded p-3 ps-5 border-start border-warning border-5">
+                    <a href="/profile/${element.authorId}" class="fw-bolder text-decoration-none link-dark text-capitalize">${element.author}</a>
+                    <p class="small mt-2">${element.comment}</p>
+                    </li>
+                    `)
+                })
+              } catch (e) {
+                alert(e)
+              }
+            }
+             }
+            },
+            error: function (xhr, status, error) {
+              alert(xhr.responseText)
+            }
+          }).done(function () {
+            console.log('OK')
+          })
+        })
+
+        $('#viewComments').click(function () {
+          var tid = $('#_tid').val()
+          $.ajax({
+            url: '/ticket/'+tid+'/viewComments',
+            method: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
+              try {
+                ajaxResultvc.push(data)
+                comments = data.comments
+                //Cleaning comments list to set new comments list
+                $('#commentsList').empty()
+
+                //Populating comments list
+                data.forEach(element => {
+                  $('#commentsList').append(`
+                    <li class="mb-2 bg-light rounded p-3 ps-5 border-start border-warning border-5">
+                    <a href="/profile/${element.authorId}" class="fw-bolder text-decoration-none link-dark text-capitalize">${element.author}</a>
+                    <p class="small mt-2">${element.comment}</p>
+                    </li>
+                    `)
+                })
+              } catch (e) {
+                alert(e)
+              }
+            },
+            error: function (xhr, status, error) {
+              alert(xhr.responseText)
+            }
+          }).done(function () {
+            console.log('OK')
+          })
+        })
+      })
+
+    const getCookieValue = name =>
+    document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() ||''
+
+    </script>
+  </body>
 </html>

@@ -16,6 +16,12 @@ thead > tr > th {
 	width: 150px;
 }
 
+.ip_error {
+	color:red;
+	font-size:small;
+	float:right;
+  }
+
 td, th {
 	text-align: center;
 }
